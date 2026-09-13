@@ -4,9 +4,13 @@
   hosts: prod
   become: true
   pre_tasks:
-    - name: Install EPEL release
-      yum: name=epel-release state=present
+    - name: Install some package
+      yum: name='{{ item }}' state=present
       when: ansible_distribution == "CentOS"
+      loop:
+        - epel-release
+        - wget
+        - git
     - name: Install python-pip
       yum:
         name:
@@ -20,11 +24,17 @@
         name: docker
         executable: pip3
   tasks:
+  - name: Copy website file template
+    template:
+      src: index.html.j2
+      dest: /home/admin/index.html
   - name: Create Apache Container
     docker_container:
       name: webapp
       image: httpd
       ports:
         - "80:80"
+      volumes:
+        - /home/admin/index.html:/usr/local/apache2/htdocs/index.html
     vars:
       ansible_python_interpreter: /usr/bin/python3
