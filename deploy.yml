@@ -3,6 +3,8 @@
 - name: "Apache installation using Docker"
   hosts: prod
   become: true
+  vars_files:
+    - files/secrets/credentials.yml
   pre_tasks:
     - name: Install some package
       yum: name='{{ item }}' state=present
